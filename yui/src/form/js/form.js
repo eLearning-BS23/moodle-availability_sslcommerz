@@ -35,25 +35,30 @@ M.availability_sslcommerz.form.getNode = function(json) {
         currencies_options += '</option>';
     }
 
-    var html = '<div><label>';
+    var html = '<div><table><tr><td><label>';
     html += M.util.get_string('businessemail', 'availability_sslcommerz');
-    html += '<input name="businessemail" type="email" /></label></div>';
+    html += '</label></td><td>';
+    html += '<input name="businessemail" type="email" /></td></tr>';
 
-    html += '<div><label>';
+    html += '<tr><td><label>';
     html += M.util.get_string('currency', 'availability_sslcommerz');
-    html += '<select name="currency" />' + currencies_options + '</select></label></div>';
+    html += '</label></td><td>';
+    html += '<select name="currency" />' + currencies_options + '</select></td></tr>';
 
-    html += '<div><label>';
+    html += '<tr><td><label>';
     html += M.util.get_string('cost', 'availability_sslcommerz');
-    html += '<input name="cost" type="text" /></label></div>';
+    html += '</label></td><td>';
+    html += '<input name="cost" type="text" /></td></tr>';
 
-    html += '<div><label>';
+    html += '<tr><td><label>';
     html += M.util.get_string('itemname', 'availability_sslcommerz');
-    html += '<input name="itemname" type="text" /></label></div>';
+    html += '</label></td><td>';
+    html += '<input name="itemname" type="text" /></td></tr>';
 
-    html += '<div><label>';
+    html += '<tr><td><label>';
     html += M.util.get_string('itemnumber', 'availability_sslcommerz');
-    html += '<input name="itemnumber" type="text" /></label></div>';
+    html += '</label></td><td>';
+    html += '<input name="itemnumber" type="text" /></td></tr></table>';
 
     var node = Y.Node.create('<span>' + html + '</span>');
 
