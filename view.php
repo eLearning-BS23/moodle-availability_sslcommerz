@@ -48,9 +48,9 @@ if ($cmid) {
 }
 
 $conditions = json_decode($availability->availability);
-$paypal = availability_paypal_find_condition($conditions);
+$sslcommerz = availability_sslcommerz_find_condition($conditions);
 
-if (is_null($paypal)) {
+if (is_null($sslcommerz)) {
     print_error('no sslcommerz condition for this context.');
 }
 
@@ -62,7 +62,7 @@ $context = \context::instance_by_id($contextid);
 $tnxparams = ['userid' => $USER->id, 'contextid' => $contextid, 'sectionid' => $sectionid];
 
 if ($DB->record_exists('availability_sslcommerz_tnx', $tnxparams + ['payment_status' => 'Completed'])) {
-    unset($SESSION->availability_paypal->paymentid);
+    unset($SESSION->availability_sslcommerz->paymentid);
     redirect($context->get_url(), get_string('paymentcompleted', 'availability_sslcommerz'));
 }
 
@@ -74,26 +74,26 @@ $PAGE->set_url('/availability/condition/sslcommerz/view.php', $urlparams);
 $PAGE->set_title($course->fullname);
 $PAGE->set_heading($course->fullname);
 
-$PAGE->navbar->add($paypal->itemname);
+$PAGE->navbar->add($sslcommerz->itemname);
 
 echo $OUTPUT->header(),
-$OUTPUT->heading($paypal->itemname);
+$OUTPUT->heading($sslcommerz->itemname);
 
 if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
     echo get_string('paymentpending', 'availability_sslcommerz');
     echo $OUTPUT->continue_button($context->get_url(), 'get');
 
-} else if ($paymentid !== null && $paymentid === ($SESSION->availability_paypal->paymentid ?? null)) {
-    // The users returned from PayPal before the IPN was processed.
+} else if ($paymentid !== null && $paymentid === ($SESSION->availability_sslcommerz->paymentid ?? null)) {
+    // The users returned from sslcommerz before the IPN was processed.
     echo get_string('paymentpending', 'availability_sslcommerz');
     echo $OUTPUT->continue_button($context->get_url(), 'get');
 
 } else {
 
-    // Calculate localised and "." cost, make sure we send PayPal the same value,
-    // please note PayPal expects amount with 2 decimal places and "." separator.
-    $localisedcost = format_float($paypal->cost, 2, true);
-    $cost = format_float($paypal->cost, 2, false);
+    // Calculate localised and "." cost, make sure we send sslcommerz the same value,
+    // please note sslcommerz expects amount with 2 decimal places and "." separator.
+    $localisedcost = format_float($sslcommerz->cost, 2, true);
+    $cost = format_float($sslcommerz->cost, 2, false);
 
     if (isguestuser()) { // Force login only for guest user, not real users with guest role.
         if (empty($CFG->loginhttps)) {
@@ -108,7 +108,7 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         echo '<p><a href="'.$wwwroot.'/login/">'.get_string('loginsite').'</a></p>';
         echo '</div>';
     } else {
-        // Sanitise some fields before building the PayPal form.
+        // Sanitise some fields before building the sslcommerz form.
         $userfullname    = fullname($USER);
         $userfirstname   = $USER->firstname;
         $userlastname    = $USER->lastname;
@@ -116,37 +116,46 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         $usercity        = $USER->city;
         ?>
         <p><?php print_string("paymentrequired", 'availability_sslcommerz') ?></p>
-        <p><b><?php echo get_string("cost").": {$paypal->currency} {$localisedcost}"; ?></b></p>
-        <p><img alt="<?php print_string('paypalaccepted', 'availability_sslcommerz') ?>"
-                title="<?php print_string('paypalaccepted', 'availability_sslcommerz') ?>"
-                src="https://www.paypal.com/en_US/i/logo/PayPal_mark_60x38.gif" /></p>
+        <p><b><?php echo get_string("cost").": {$sslcommerz->currency} {$localisedcost}"; ?></b></p>
+        <p><img alt="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
+                title="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
+                src="https://www.sslcommerz.com/en_US/i/logo/sslcommerz_mark_60x38.gif" /></p>
         <p><?php print_string("paymentinstant", 'availability_sslcommerz') ?></p>
         <?php
-        if (empty($CFG->usepaypalsandbox)) {
-            $paypalurl = 'https://www.paypal.com/cgi-bin/webscr';
+
+//        Need to change here
+
+
+
+
+
+
+
+        if (empty($CFG->usesslcommerzsandbox)) {
+            $sslcommerzurl = 'https://www.sslcommerz.com/cgi-bin/webscr';
         } else {
-            $paypalurl = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+            $sslcommerzurl = 'https://www.sandbox.sslcommerz.com/cgi-bin/webscr';
         }
 
-        // Add a helper parameter for us to see that we just returned from PayPal.
+        // Add a helper parameter for us to see that we just returned from sslcommerz.
         $SESSION->availability_sslcommerz = $SESSION->availability_sslcommerz ?? (object) [];
         $SESSION->availability_sslcommerz->paymentid = clean_param(uniqid(), PARAM_ALPHANUM);
         $returnurl = new moodle_url($PAGE->url, ['paymentid' => $SESSION->availability_sslcommerz->paymentid]);
 
         ?>
-        <form action="<?php echo $paypalurl ?>" method="post">
+        <form action="<?php echo $sslcommerzurl ?>" method="post">
 
             <input type="hidden" name="cmd" value="_xclick" />
             <input type="hidden" name="charset" value="utf-8" />
-            <input type="hidden" name="business" value="<?php p($paypal->businessemail)?>" />
-            <input type="hidden" name="item_name" value="<?php p($paypal->itemname) ?>" />
-            <input type="hidden" name="item_number" value="<?php p($paypal->itemnumber) ?>" />
+            <input type="hidden" name="business" value="<?php p($sslcommerz->businessemail)?>" />
+            <input type="hidden" name="item_name" value="<?php p($sslcommerz->itemname) ?>" />
+            <input type="hidden" name="item_number" value="<?php p($sslcommerz->itemnumber) ?>" />
             <input type="hidden" name="quantity" value="1" />
             <input type="hidden" name="on0" value="<?php print_string("user") ?>" />
             <input type="hidden" name="os0" value="<?php p($userfullname) ?>" />
             <input type="hidden" name="custom" value="<?php echo "availability_sslcommerz-{$USER->id}-{$contextid}-{$sectionid}" ?>" />
 
-            <input type="hidden" name="currency_code" value="<?php p($paypal->currency) ?>" />
+            <input type="hidden" name="currency_code" value="<?php p($sslcommerz->currency) ?>" />
             <input type="hidden" name="amount" value="<?php p($cost) ?>" />
 
             <input type="hidden" name="for_auction" value="false" />
