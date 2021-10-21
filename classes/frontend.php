@@ -17,8 +17,8 @@
 /**
  * Front-end class.
  *
- * @package availability_paypal
- * @copyright 2015 Daniel Neis Araujo <danielneis@gmail.com>
+ * @package    availability_sslcommerz
+ * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,8 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Front-end class.
  *
- * @package availability_sslcommerz
- * @copyright 2015 Daniel Neis
+ * @package    availability_sslcommerz
+ * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class frontend extends \core_availability\frontend {
