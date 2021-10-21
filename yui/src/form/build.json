@@ -1,0 +1,10 @@
+{
+  "name": "moodle-availability_sslcommerz-form",
+  "builds": {
+    "moodle-availability_sslcommerz-form": {
+      "jsfiles": [
+        "form.js"
+      ]
+    }
+  }
+}

@@ -119,11 +119,11 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         <p><b><?php echo get_string("cost").": {$sslcommerz->currency} {$localisedcost}"; ?></b></p>
         <p><img alt="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
                 title="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
-                src="https://www.sslcommerz.com/en_US/i/logo/sslcommerz_mark_60x38.gif" /></p>
+                src="https://www.sslcommerz.com/wp-content/uploads/2019/11/footer_logo.png" /></p>
         <p><?php print_string("paymentinstant", 'availability_sslcommerz') ?></p>
         <?php
 
-//        Need to change here
+//        Need to edit here
 
 
 
@@ -132,9 +132,9 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
 
 
         if (empty($CFG->usesslcommerzsandbox)) {
-            $sslcommerzurl = 'https://www.sslcommerz.com/cgi-bin/webscr';
+            $sslcommerzurl = 'https://www.sslcommerz.com';
         } else {
-            $sslcommerzurl = 'https://www.sandbox.sslcommerz.com/cgi-bin/webscr';
+            $sslcommerzurl = 'https://sandbox.sslcommerz.com/manage/';
         }
 
         // Add a helper parameter for us to see that we just returned from sslcommerz.
