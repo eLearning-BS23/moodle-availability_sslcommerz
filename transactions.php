@@ -18,7 +18,7 @@
  * Shows all sslcommerz transactions and allows to manually validate them.
  *
  * @package     availability_sslcommerz
- * @copyright   2021 David Mudrák <david@moodle.com>
+ * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
