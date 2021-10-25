@@ -128,13 +128,11 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
 
 
 
-
-
-
+//        var_dump(usesslcommerzsandbox);
         if (empty($CFG->usesslcommerzsandbox)) {
-            $sslcommerzurl = 'https://www.sslcommerz.com';
+            $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
         } else {
-            $sslcommerzurl = 'https://sandbox.sslcommerz.com/manage/';
+            $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
         }
 
         // Add a helper parameter for us to see that we just returned from sslcommerz.
