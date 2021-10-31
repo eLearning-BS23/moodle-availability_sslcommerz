@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * sslcommerz enrolment plugin - support for user self unenrolment.
+ * sslcommerz availability condition plugin - support for user accessing activity or resource
  *
- * @package    enrol_sslcommerz
+ * @package    availability_sslcommerz
  * @copyright  2021 Brain station 23 ltd.
  * @author     Brain station 23 ltd.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,17 +29,16 @@ require_login($course, true, $cm);
 global $CFG, $USER;
 /* PHP */
 
-//var_dump($_POST); die();
 $postdata = array();
-$postdata['store_id'] = get_config('enrol_sslcommerz')->sslstoreid;
-$postdata['store_passwd'] = get_config('enrol_sslcommerz')->sslstorepassword;
+$postdata['store_id'] = get_config('availability_sslcommerz')->sslstoreid;
+$postdata['store_passwd'] = get_config('availability_sslcommerz')->sslstorepassword;
 $postdata['total_amount'] = $_POST['amount'];
 $postdata['currency'] = $_POST['currency_code'];
 $postdata['tran_id'] = "MD_COURSE_" . uniqid();
-$postdata['success_url'] = $CFG->wwwroot . "/enrol/sslcommerz/success.php?id=" . $_POST['course_id'];
-$postdata['fail_url'] = $CFG->wwwroot . "/enrol/sslcommerz/fail.php?id=" . $_POST['course_id'];
-$postdata['cancel_url'] = $CFG->wwwroot . "/enrol/sslcommerz/cancel.php?id=" . $_POST['course_id'];
-$postdata['ipn_url'] = $CFG->wwwroot . "/enrol/sslcommerz/ipn.php?id=" . $_POST['course_id'];
+$postdata['success_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/success.php?id=" . $_POST['course_id'];
+$postdata['fail_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/fail.php?id=" . $_POST['course_id'];
+$postdata['cancel_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/cancel.php?id=" . $_POST['course_id'];
+$postdata['ipn_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/ipn.php?id=" . $_POST['course_id'];
 
 $postdata['cus_name'] = $_POST['os0'];
 $postdata['cus_email'] = $_POST['email'];
@@ -61,8 +60,8 @@ $postdata['value_d'] = $_POST['instance_id'];
 
 $data = new stdClass();
 
-$data->userid = (int)$_POST['user_id'];
-$data->courseid = (int)$_POST['course_id'];
+$data->userid = (int)$_POST['userid'];
+$data->courseid = (int)$_POST['courseid'];
 $data->instanceid = (int)$_POST['instance_id'];
 $data->payment_currency = $_POST['currency_code'];
 $data->payment_status = 'Pending';
@@ -73,7 +72,7 @@ $DB->insert_record("availability_sslcommerz_tnx", $data);
 
 
 // REQUEST SEND TO SSLCOMMERZ.
-$directapiurl = get_config("enrol_sslcommerz")->apiurl;
+$directapiurl = get_config("availability_sslcommerz")->apiurl;
 $handle = curl_init();
 curl_setopt($handle, CURLOPT_URL, $directapiurl);
 curl_setopt($handle, CURLOPT_TIMEOUT, 30);
