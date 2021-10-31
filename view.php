@@ -61,6 +61,8 @@ require_login($course);
 $context = \context::instance_by_id($contextid);
 $tnxparams = ['userid' => $USER->id, 'contextid' => $contextid, 'sectionid' => $sectionid];
 
+
+// payment successful
 if ($DB->record_exists('availability_sslcommerz_tnx', $tnxparams + ['payment_status' => 'Completed'])) {
     unset($SESSION->availability_sslcommerz->paymentid);
     redirect($context->get_url(), get_string('paymentcompleted', 'availability_sslcommerz'));
@@ -131,8 +133,10 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
 //        var_dump(usesslcommerzsandbox);
         if (empty($CFG->usesslcommerzsandbox)) {
             $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
+//            $sslcommerzurl = 'https://sandbox.sslcommerz.com/gwprocess/v3/gw.php';
         } else {
             $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
+//            $sslcommerzurl = 'https://sandbox.sslcommerz.com/gwprocess/v3/gw.php';
         }
 
         // Add a helper parameter for us to see that we just returned from sslcommerz.
