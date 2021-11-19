@@ -61,7 +61,6 @@ $string['expiredaction'] = 'Enrolment expiry action';
 $string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
 $string['itemname'] = 'Item name';
 $string['itemname_help'] = 'Name of the item to be shown on SSLCommerz form';
-$string['itemname_help'] = 'Number of the item to be shown on SSLCommerz form';
 $string['itemnumber'] = 'Item number';
 $string['messageprovider:payment_error'] = 'Payment errors';
 $string['messageprovider:payment_pending'] = 'Pending payments';
@@ -88,4 +87,5 @@ $string['coursemissing'] = 'Course "{$a}" doesn\'t exist';
 $string['paymendue'] = 'Amount paid is not enough "{$a}"?';
 $string['notifications'] = 'Payment Successful';
 $string['notificationdatahasnotbeenmigrated'] = 'Notification data has not been migrated';
+$string['sslcommerzaccepted'] = '';
 

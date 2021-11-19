@@ -24,55 +24,30 @@
  */
 
 use mod_lti\local\ltiservice\response;
-
-
 require(__DIR__ . '/../../../config.php');
-require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
-require_login($course, true, $cm);
 
 global $CFG, $USER;
+require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
+require_login();
+
+global $CFG, $USER;
+$custom =$_POST['value_a'];
+$custom = explode('-', $custom);
+$data = new stdClass();
+$data->userid = $_POST['value_c'];
+$data->contextid = (int)$_POST['value_b'];
+$data->sectionid = $custom[3];
+$data->memo = $_POST['bank_tran_id'];
+$data->tax = 0;
+$data->payment_status = 'Completed';
+$data->txn_id = $_POST['tran_id'];
+$data->payment_type = $_POST['card_type'];
+$data->timeupdated = time();
 
 
-
-//$course = $DB->get_record('course', ['id' => $availability->course]);
-
-//
-//$cmid = optional_param('cmid', 0, PARAM_INT);
-//$sectionid = optional_param('sectionid', 0, PARAM_INT);
-//$paymentid = optional_param('paymentid', null, PARAM_ALPHANUM);
-//
-//
-//$conditions = json_decode($availability->availability);
-//$sslcommerz = availability_sslcommerz_find_condition($conditions);
-//
-//if (is_null($sslcommerz)) {
-//    print_error('no sslcommerz condition for this context.');
-//}
-//
-//$course = $DB->get_record('course', ['id' => $availability->course]);
+$DB->insert_record("availability_sslcommerz_tnx", $data);
 
 
-
-
-//require_login($course, true, $cm);
-
-$context = \context::instance_by_id($contextid);
-$tnxparams = ['userid' => $USER->id, 'contextid' => $contextid, 'sectionid' => $sectionid];
-
-//// payment successful
-//if ($DB->record_exists('availability_sslcommerz_tnx', $tnxparams + ['payment_status' => 'Completed'])) {
-//    unset($SESSION->availability_sslcommerz->paymentid);
-//    redirect($context->get_url(), get_string('paymentcompleted', 'availability_sslcommerz'));
-//}
-//
-
-
-
-
-redirect('/moodle/course/view.php?id=8', 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
-//redirect('/moodle/availability/condition/sslcommerz/view.php', 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
-
-//$DB->get_record('availability_sslcommerz_tnx', ['id' => $sectionid], 'course, availability', MUST_EXIST);
-
+redirect($CFG->wwwroot . '/course/view.php?id='.$_POST['value_d'], 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
 
 

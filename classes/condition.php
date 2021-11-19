@@ -118,6 +118,7 @@ class condition extends \core_availability\condition {
                 array('userid' => $userid,
                     'contextid' => $context->id,
                     'payment_status' => 'Completed'));
+
         } else if (is_a($info, '\\core_availability\\info_section')) {
             $section = $info->get_section();
             $allow = $DB->record_exists('availability_sslcommerz_tnx',

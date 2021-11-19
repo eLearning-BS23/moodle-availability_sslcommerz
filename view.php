@@ -125,19 +125,9 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         <p><?php print_string("paymentinstant", 'availability_sslcommerz') ?></p>
         <?php
 
-//        Need to edit here
+        // Need to edit here
 
-
-
-
-//        var_dump(usesslcommerzsandbox);
-        if (empty($CFG->usesslcommerzsandbox)) {
-            $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
-//            $sslcommerzurl = 'https://sandbox.sslcommerz.com/gwprocess/v3/gw.php';
-        } else {
-            $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
-//            $sslcommerzurl = 'https://sandbox.sslcommerz.com/gwprocess/v3/gw.php';
-        }
+        $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
 
         // Add a helper parameter for us to see that we just returned from sslcommerz.
         $SESSION->availability_sslcommerz = $SESSION->availability_sslcommerz ?? (object) [];
@@ -150,17 +140,20 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
             <input type="hidden" name="cmd" value="_xclick" />
             <input type="hidden" name="charset" value="utf-8" />
             <input type="hidden" name="business" value="<?php p($sslcommerz->businessemail)?>" />
-            <input type="hidden" name="item_name" value="<?php p($sslcommerz->itemname) ?>" />
-            <input type="hidden" name="item_number" value="<?php p($sslcommerz->itemnumber) ?>" />
+<!--            <input type="hidden" name="item_name" value="--><?php //p($sslcommerz->itemname) ?><!--" />-->
+<!--            <input type="hidden" name="item_number" value="--><?php //p($sslcommerz->itemnumber) ?><!--" />-->
             <input type="hidden" name="quantity" value="1" />
+            <input type="hidden" name="userid" value="<?php  echo $USER->id;  ?>" />
             <input type="hidden" name="on0" value="<?php print_string("user") ?>" />
             <input type="hidden" name="os0" value="<?php p($userfullname) ?>" />
             <input type="hidden" name="custom" value="<?php echo "availability_sslcommerz-{$USER->id}-{$contextid}-{$sectionid}" ?>" />
 
             <input type="hidden" name="currency_code" value="<?php p($sslcommerz->currency) ?>" />
             <input type="hidden" name="amount" value="<?php p($cost) ?>" />
+            <input type="hidden" name="courseid" value="<?php p($course) ?>" />
 
             <input type="hidden" name="for_auction" value="false" />
+            <input type="hidden" name="cmid" value="<?php echo $cmid; ?>" />
             <input type="hidden" name="no_note" value="1" />
             <input type="hidden" name="no_shipping" value="1" />
             <input type="hidden" name="notify_url" value="<?php echo "{$CFG->wwwroot}/availability/condition/sslcommerz/ipn.php" ?>" />

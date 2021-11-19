@@ -36,7 +36,7 @@ $valid = urlencode($_POST['val_id']);
 $storeid = urlencode(get_config('enrol_sslcommerz')->sslstoreid);
 $storepasswd = urlencode(get_config('enrol_sslcommerz')->sslstorepassword);
 $requestedurl =
-    ("https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id="
+    (get_config('enrol_sslcommerz')->requestedurl . "?val_id="
         . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
 $id = required_param('id', PARAM_INT);
 $userid = required_param('user_id', PARAM_INT);
