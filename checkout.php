@@ -30,6 +30,7 @@ global $CFG, $USER;
 require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
 /* PHP */
 
+
 $custom = explode('-', $_POST['custom']);
 $courseid = $custom[2];
 $postdata = array();
@@ -58,13 +59,12 @@ $postdata['cus_fax'] = "";
 $postdata['value_a'] = $_POST['custom'];
 $postdata['value_b'] = $courseid;
 $postdata['value_c'] = $_POST['userid'];
-$postdata['value_d'] = $_POST['courseid'];
+$postdata['value_d'] = $_POST['cmid'];
 
 $data = new stdClass();
 
 $data->userid = (int)$_POST['userid'];
 $data->courseid = (int)$courseid;
-$data->item_name = (int)$_POST['item_name'];
 $data->contextid = (int)$custom[2];
 $data->sectionid = (int)$custom[3];
 $data->instanceid = (int)$_POST['cmid'];
@@ -74,7 +74,7 @@ $data->txn_id = $postdata['tran_id'];
 $data->timeupdated = time();
 
 $cmid = $_POST['cmid'];
-$sectionid = $data->contextid;
+$sectionid = $data->sectionid;
 
 if (!$cmid && !$sectionid) {
     print_error('invalidparam');

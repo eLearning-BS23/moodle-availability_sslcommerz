@@ -47,7 +47,11 @@ $data->timeupdated = time();
 
 $DB->insert_record("availability_sslcommerz_tnx", $data);
 
+$url = $CFG->wwwroot. '/?redirect=0';
+if ($_POST['value_d']){
+    $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid='.$_POST['value_d'];
 
-redirect($CFG->wwwroot . '/course/view.php?id='.$_POST['value_d'], 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
+}
+redirect($url, 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
 
 

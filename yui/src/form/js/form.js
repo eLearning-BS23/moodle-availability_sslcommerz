@@ -36,9 +36,9 @@ M.availability_sslcommerz.form.getNode = function(json) {
     }
 
     var html = '<div><table><tr><td><label>';
-    html += M.util.get_string('businessemail', 'availability_sslcommerz');
+    // html += M.util.get_string('businessemail', 'availability_sslcommerz');
     html += '</label></td><td>';
-    html += '<input name="businessemail" type="email" /></td></tr>';
+    html += '<input name="businessemail" type="hidden" /></td></tr>';
 
     html += '<tr><td><label>';
     html += M.util.get_string('currency', 'availability_sslcommerz');
@@ -51,14 +51,14 @@ M.availability_sslcommerz.form.getNode = function(json) {
     html += '<input name="cost" type="text" /></td></tr>';
 
     html += '<tr><td><label>';
-    html += M.util.get_string('itemname', 'availability_sslcommerz');
+    // html += M.util.get_string('itemname', 'availability_sslcommerz');
     html += '</label></td><td>';
-    html += '<input name="itemname" type="text" /></td></tr>';
+    html += '<input name="itemname" type="hidden" /></td></tr>';
 
     html += '<tr><td><label>';
-    html += M.util.get_string('itemnumber', 'availability_sslcommerz');
+    // html += M.util.get_string('itemnumber', 'availability_sslcommerz');
     html += '</label></td><td>';
-    html += '<input name="itemnumber" type="text" /></td></tr></table>';
+    html += '<input name="itemnumber"  type="hidden" /></td></tr></table>';
 
     var node = Y.Node.create('<span>' + html + '</span>');
 
@@ -139,16 +139,16 @@ M.availability_sslcommerz.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
 
-    if (value.businessemail === '') {
-        errors.push('availability_sslcommerz:error_businessemail');
-    }
+    // if (value.businessemail === '') {
+    //     errors.push('availability_sslcommerz:error_businessemail');
+    // }
     if ((value.cost !== undefined && typeof (value.cost) === 'string') || value.cost <= 0) {
         errors.push('availability_sslcommerz:error_cost');
     }
-    if (value.itemname === '') {
-        errors.push('availability_sslcommerz:error_itemname');
-    }
-    if (value.itemnumber === '') {
-        errors.push('availability_sslcommerz:error_itemnumber');
-    }
+    // if (value.itemname === '') {
+    //     errors.push('availability_sslcommerz:error_itemname');
+    // }
+    // if (value.itemnumber === '') {
+    //     errors.push('availability_sslcommerz:error_itemnumber');
+    // }
 };

@@ -28,8 +28,11 @@ defined('MOODLE_INTERNAL') || die();
 // @codingStandardsIgnoreLine This script does not require login.
 require(__DIR__ . '/../../../config.php');
 require_once("lib.php");
+global $DB, $CFG, $USER, $PAGE;
+
 require_once($CFG->libdir . '/enrollib.php');
 require_once($CFG->libdir . '/filelib.php');
+
 
 // PayPal does not like when we return error messages here,
 // the custom handler just logs exceptions and stops.
@@ -51,33 +54,17 @@ $req = 'cmd=_notify-validate';
 
 $data = new stdClass();
 
-foreach ($_POST as $key => $value) {
-    if ($key !== clean_param($key, PARAM_ALPHANUMEXT)) {
-        throw new moodle_exception('invalidrequest', 'core_error', '', null, $key);
-    }
-    if (is_array($value)) {
-        throw new moodle_exception('invalidrequest', 'core_error', '', null, 'Unexpected array param: ' . $key);
-    }
-    $req .= "&$key=" . urlencode($value);
-    $data->$key = fix_utf8($value);
-}
-
-if (empty($_POST['value_a'])) {
-    throw new moodle_exception('invalidrequest', 'core_error', '', null, 'Missing request param: custom');
-}
-
-$custom = explode('-', $_POST['value_a']);
-
-
-if (empty($custom) || count($custom) < 3) {
-    throw new moodle_exception('invalidrequest', 'core_error', '', null, 'Invalid value of the request param: custom');
-}
-
-
-$data->userid = (int)$custom[0];
-$data->courseid = (int)$custom[1];
-$data->instanceid = (int)$custom[2];
-$data->payment_currency = $data->currency;
+$custom = $_POST['value_a'];
+$custom = explode('-', $custom);
+$data = new stdClass();
+$data->userid = $_POST['value_c'];
+$data->contextid = (int)$_POST['value_b'];
+$data->sectionid = $custom[3];
+$data->memo = $_POST['bank_tran_id'];
+$data->tax = 0;
+$data->payment_status = 'Completed';
+$data->txn_id = $_POST['tran_id'];
+$data->payment_type = $_POST['card_type'];
 $data->timeupdated = time();
 
 $user = $DB->get_record("user", array("id" => $data->userid), "*", MUST_EXIST);
@@ -103,7 +90,6 @@ $handle = curl_init();
 curl_setopt($handle, CURLOPT_URL, $requestedurl);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false); // IF YOU RUN FROM LOCAL PC.
-curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false); // IF YOU RUN FROM LOCAL PC.
 
 $result = curl_exec($handle);
 
@@ -118,7 +104,7 @@ if ($result) {
         $destination = $SESSION->wantsurl;
         unset($SESSION->wantsurl);
     } else {
-        $destination = $CFG->wwwroot."/course/view.php?id=$course->id";
+        $destination = $CFG->wwwroot . "/course/view.php?id=$course->id";
     }
 
     $fullname = format_string($course->fullname, true, array('context' => $context));
@@ -132,33 +118,6 @@ if ($result) {
 //        \enrol_sslcommerz\util::message_sslcommerz_error_to_admin("Invalid Information.",
 //            $data);
 //        die;
-//    }
-
-
-    $validation = $DB->get_record('availability_sslcommerz_tnx', array('txn_id' => $result->tran_id));
-
-    // Make sure this transaction doesn't exist already.
-    if (!$existing = $DB->get_record("availability_sslcommerz_tnx", array("txn_id" => $result->tran_id), "*", IGNORE_MULTIPLE)) {
-        \availability_sslcommerz\util::message_sslcommerz_error_to_admin("Transaction $result->tran_id is being repeated!", $data);
-        die;
-    }
-
-    if (!$user = $DB->get_record('user', array('id' => $data->userid))) {   // Check that user exists.
-        \availability_sslcommerz\util::message_sslcommerz_error_to_admin("User $data->userid doesn't exist", $data);
-        redirect($destination, get_string('usermissing', 'availability_sslcommerz', $data->userid));
-        die;
-    }
-
-    if (!$course = $DB->get_record('course', array('id' => $data->courseid))) { // Check that course exists.
-        \availability_sslcommerz\util::message_sslcommerz_error_to_admin("Course $data->courseid doesn't exist", $data);
-        redirect($destination, get_string('coursemissing', 'availability_sslcommerz', $data->courseid));
-        die;
-    }
-
-//    if ((float)$plugininstance->cost <= 0) {
-//        $cost = (float)$plugin->get_config('cost');
-//    } else {
-//        $cost = (float)$plugininstance->cost;
 //    }
 
     // Use the same rounding of floats as on the availability form.
@@ -175,76 +134,29 @@ if ($result) {
     $data->item_name = $course->fullname;
     $data->payment_status = $result->status;
 
-    $coursecontext = context_course::instance($course->id, IGNORE_MISSING);
-
+    $coursecontext = $PAGE->set_context(context_course::instance());
     switch ($result->status) {
         case 'VALID':
-            // Check from existing record.
-            if ($validation->payment_status == 'Pending') {
-
-                $data->id = $validation->id;
-                $data->payment_status = 'Pending';
-                $entry = $DB->update_record("availability_sslcommerz_tnx", $data, $bulk = false);
-//                $DB->insert_record("enrol_sslcommerz_log", $data, $bulk = false);
-
-//                if ($plugininstance->enrolperiod) {
-//                    $timestart = time();
-//                    $timeend = $timestart + $plugininstance->enrolperiod;
-//                } else {
-//                    $timestart = 0;
-//                    $timeend = 0;
-//                }
-
-//                // Enrol user.
-//                $plugin->enrol_user($plugininstance, $user->id, $plugininstance->roleid, $timestart, $timeend);
-
-
-                $this->mailFuntion($context);
-
-                $fullname = format_string($course->fullname, true, array('context' => $context));
-
-
-
-
-
-                if (is_enrolled($context, $user, '', true)) { // TODO: use real sslcommerz check.
-                    echo "Payment Successful";
-
-                } else {   // Somehow they aren't enrolled yet.
-                    echo "Payment was not valid";
-                }
-            } else {
-                echo "This order is already Successful";
-            }
+            $DB->insert_record("availability_sslcommerz_tnx", $data);
 
             break;
-
-
-
 
 
         case 'FAILED':
 
             $data->id = $validation->id;
             $data->payment_status = 'Processing';
-            $entry = $DB->update_record("availability_sslcommerz_tnx", $data, $bulk = false);
-//            $DB->insert_record("availability_sslcommerz_log", $data, $bulk = false);
             redirect($destination, get_string('paymentfail', 'availability_sslcommerz', $fullname));
 
             break;
 
         case 'CANCELLED':
 
-            $record = $DB->update_record("availability_sslcommerz_tnx", $data, $bulk = false);
-//            $log = $DB->insert_record("enrol_sslcommerz_log", $data);
             echo "Payment was Cancelled";
 
             break;
 
         default:
-
-            $record = $DB->update_record("availability_sslcommerz_tnx", $data, $bulk = false);
-//            $log = $DB->insert_record("availability_sslcommerz_log", $data);
             echo "Invalid Information.";
 
             break;

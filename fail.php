@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * sslcommerz availability condition plugin settings and presets.
+ * sslcommerz enrolments plugin settings and presets.
  *
  * @package    availability_sslcommerz
  * @copyright  2021 Brain station 23 ltd.
@@ -23,154 +23,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_lti\local\ltiservice\response;
 require(__DIR__ . '/../../../config.php');
-require_login($course, true, $cm);
-//require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-//Srequire_once("$CFG->dirroot/enrol/sslcommerz/lib.php");
+
 
 global $CFG, $USER;
+require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
+require_login();
 
-$courseid = required_param('id', PARAM_INT);
+$error = $_POST['error'] ?? 'Payment cancelled by user';
+$url = $CFG->wwwroot. '/?redirect=0';
+if ($_POST['value_d']){
+    $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid='.$_POST['value_d'];
 
-$data = new stdClass();
-// Check custom data requested from  ssl.
-if (empty($_POST['value_a'])) {
-    throw new moodle_exception('invalidrequest', 'core_error', '', null, 'Missing request param: custom');
 }
-$custom = explode('-', $_POST['value_a']);
-// Check custom data is valid.
-if (empty($custom) || count($custom) < 3) {
-    throw new moodle_exception('invalidrequest', 'core_error', '', null, 'Invalid value of the request param: custom');
-}
+redirect($url, $error , null, \core\output\notification::NOTIFY_ERROR);
 
 
-$data->userid = (int)$custom[0];
-$data->courseid = (int)$custom[1];
-$data->instanceid = (int)$custom[2];
-$data->payment_currency = $_POST['currency'];
-$data->timeupdated = time();
-$data->receiver_email = $USER->email;
-$data->receiver_id = $USER->id;
-$data->payment_status = $_POST['status'];
-$course = $DB->get_record("course", array("id" => $data->courseid), "*", MUST_EXIST);
-
-$data->item_name = $course->fullname;
-
-
-$validation = $DB->get_record('availability_sslcommerz_tnx', array('txn_id' => $_POST['tran_id']));
-
-$data->id = $validation->id;
-
-$record = $DB->update_record("availability_sslcommerz_tnx", $data, $bulk = false);
-//$log = $DB->insert_record("availability_sslcommerz_log", $data);
-
-$context = context_course::instance($course->id, MUST_EXIST);
-
-$PAGE->set_context($context);
-
-// ... require_login();
-
-$params = array(
-    'id' => $courseid
-);
-//$url = new moodle_url(
-//    '/enrol/index.php',
-//    $params
-//);
-
-
-// ... $PAGE->set_url($url);.
-$PAGE->set_pagelayout('course');
-$PAGE->set_title($course->shortname . ': ' . get_string('pluginname', 'availability_sslcommerz'));
-$PAGE->set_heading($course->fullname . ': ' . get_string('pluginname', 'availability_sslcommerz'));
-
-$PAGE->navbar->add(get_string('course', 'availability_sslcommerz'), $url);
-
-echo $OUTPUT->header();
-
-
-?>
-<div class="row" style="margin-top: 10%;">
-    <div class="col-md-8 offset-md-2">
-        <?php
-
-        // Connect to database after confirming the request.
-        $tranid = trim($_POST['tran_id']);
-
-        // First check if the POST request is real!
-        if (empty($tranid) || empty($tranid)) {
-            echo '<h2 class="text-center text-danger">Invalid Information.</h2>';
-            exit;
-        }
-
-
-        if ($_POST['status'] == 'PENDING' || $_POST['status'] == 'FAILED') {
-
-
-            ?>
-            <h2 class="text-center text-danger">Unfortunately your Transaction FAILED.</h2>
-            <br>
-
-            <table border="1" class="table table-striped">
-                <thead class="thead-dark">
-                <tr class="text-center">
-                    <th colspan="2">Payment Details</th>
-                </tr>
-                </thead>
-                <tr>
-                    <td class="text-right">Error</td>
-                    <td><?php echo $_POST['error'] ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Transaction ID</td>
-                    <td><?php echo $tranid ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Payment Method</td>
-                    <td><?php echo $_POST['card_issuer'] ?></td>
-                </tr>
-                <?php if ($_POST['bank_tran_id']) { ?>
-                    <tr>
-                        <td class="text-right">Bank Transaction Id</td>
-                        <td><?php echo $_POST['bank_tran_id'] ?></td>
-                    </tr>
-                <?php }
-                ?>
-
-                <tr>
-                    <td class="text-right"><b>Amount: </b></td>
-                    <td><?php echo $_POST['amount'] . ' ' . $_POST['currency'] ?></td>
-                </tr>
-            </table>
-            <h2 class="text-center text-danger">Error updating record: </h2> <?php echo $_POST['error']; ?>
-        <?php } ?>
-        <?php if ($_POST['status'] == 'PROCESSING') : ?>
-            <table border="1" class="table table-striped">
-                <thead class="thead-dark">
-                <tr class="text-center">
-                    <th colspan="2">Payment Details</th>
-                </tr>
-                </thead>
-                <tr>
-                    <td class="text-right">Transaction ID</td>
-                    <td><?php echo $tranid ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Transaction Time</td>
-                    <td><?php echo $_POST['tran_date'] ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Payment Method</td>
-                    <td><?php echo $_POST['card_issuer'] ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Bank Transaction ID</td>
-                    <td><?php echo $_POST['bank_tran_id'] ?></td>
-                </tr>
-                <tr>
-                    <td class="text-right">Amount</td>
-                    <td><?php echo $_POST['amount'] . ' ' . $_POST['currency'] ?></td>
-                </tr>
-            </table>
-        <?php endif ?>
-    </div>
