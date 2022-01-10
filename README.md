@@ -31,6 +31,13 @@ You can download zip file and install or you can put file under enrol as sslcomm
 
 <img src="https://i.imgur.com/tlj8TH5.png">
 
+## Usage
+
+<img src="https://i.imgur.com/IEqpHAL.png">
+This works like the [sslcommerz enrol plugin](https://moodle.org/plugins/enrol_sslcommerz), but instead of restricting the full course, you can restrict individual activities, resources or sections (and you can combine it with other availability conditions, for example, to exclude some group from paying using an "or" restriction set).
+
+For each restriction you add, you can set a business email address, cost, currency, item name and item number.
+
 ## Author
 - [Brain Station 23 Ltd.](https://brainstation-23.com)
 
@@ -40,14 +47,3 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see [GNU License](http://www.gnu.org/licenses/).
-
-
-
-
-## Usage
-
-<img src="https://i.imgur.com/IEqpHAL.png">
-This works like the [sslcommerz enrol plugin](https://moodle.org/plugins/enrol_sslcommerz), but instead of restricting the full course, you can restrict individual activities, resources or sections (and you can combine it with other availability conditions, for example, to exclude some group from paying using an "or" restriction set).
-
-For each restriction you add, you can set a business email address, cost, currency, item name and item number.
-
