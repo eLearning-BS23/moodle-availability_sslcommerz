@@ -46,4 +46,8 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('availability_sslcommerz/sslstorepassword',
         get_string('businessstorepassword', 'availability_sslcommerz'),
         get_string('businessstorepassword_desc', 'availability_sslcommerz'), '', PARAM_TEXT));
+    $settings->add(new admin_setting_configtext('availability_sslcommerz/prod_environment',
+        get_string('prod_environment', 'availability_sslcommerz'),
+        get_string('prod_environment_desc', 'availability_sslcommerz'), 'false', PARAM_TEXT));
+
 }

@@ -23,20 +23,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_lti\local\ltiservice\response;
 require(__DIR__ . '/../../../config.php');
 
 
 global $CFG, $USER;
-require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
-require_login();
-
-$error = $_POST['error'] ?? 'Payment cancelled by user';
-$url = $CFG->wwwroot. '/?redirect=0';
-if ($_POST['value_d']){
-    $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid='.$_POST['value_d'];
-
+require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
+$error = optional_param('error', '', PARAM_TEXT);
+$valued = optional_param('value_d', '', PARAM_TEXT);
+$error = $error ?? 'Payment cancelled by user';
+$url = $CFG->wwwroot . '/?redirect=0';
+if ($valued) {
+    $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid=' . $valued;
 }
-redirect($url, $error , null, \core\output\notification::NOTIFY_ERROR);
+redirect($url, $error, null, \core\output\notification::NOTIFY_ERROR);
 
 

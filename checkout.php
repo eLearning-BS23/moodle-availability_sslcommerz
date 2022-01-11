@@ -25,59 +25,71 @@
 
 require(__DIR__ . '/../../../config.php');
 
+defined('MOODLE_INTERNAL') || die();
 
-global $CFG, $USER;
+global $CFG, $USER, $DB;
 require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
 /* PHP */
 
+$customarray = required_param('custom', PARAM_RAW);
+$amount = required_param('amount', PARAM_FLOAT);
+$currencycode = required_param('currency_code', PARAM_TEXT);
+$os0 = required_param('os0', PARAM_TEXT);
+$email = required_param('email', PARAM_TEXT);
+$address = required_param('address', PARAM_TEXT);
+$city = required_param('city', PARAM_TEXT);
+$country = required_param('country', PARAM_TEXT);
+$userid = required_param('userid', PARAM_INT);
+$cmid = required_param('cmid', PARAM_INT);
+$currencycode = required_param('currency_code', PARAM_TEXT);
 
-$custom = explode('-', $_POST['custom']);
+
+$custom = explode('-', $customarray);
 $courseid = $custom[2];
 $postdata = array();
 $postdata['store_id'] = get_config('availability_sslcommerz')->sslstoreid;
 $postdata['store_passwd'] = get_config('availability_sslcommerz')->sslstorepassword;
-$postdata['total_amount'] = $_POST['amount'];
-$postdata['currency'] = $_POST['currency_code'];
+$postdata['total_amount'] = $amount;
+$postdata['currency'] = $currencycode;
 $postdata['tran_id'] = "MD_COURSE_" . uniqid();
 $postdata['success_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/success.php?id=" . $courseid;
 $postdata['fail_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/fail.php?id=" . $courseid;
 $postdata['cancel_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/cancel.php?id=" . $courseid;
 $postdata['ipn_url'] = $CFG->wwwroot . "/availability/condition/sslcommerz/ipn.php?id=" . $courseid;
 
-$postdata['cus_name'] = $_POST['os0'];
-$postdata['cus_email'] = $_POST['email'];
-$postdata['cus_add1'] = $_POST['address'];
+$postdata['cus_name'] = $os0;
+$postdata['cus_email'] = $email;
+$postdata['cus_add1'] = $address;
 $postdata['cus_add2'] = "";
-$postdata['cus_city'] = $_POST['city'];
+$postdata['cus_city'] = $city;
 $postdata['cus_state'] = "";
 $postdata['cus_postcode'] = "1000";
-$postdata['cus_country'] = $_POST['country'];
+$postdata['cus_country'] = $country;
 $postdata['cus_phone'] = "";
 $postdata['cus_fax'] = "";
 
 // OPTIONAL PARAMETERS.
-$postdata['value_a'] = $_POST['custom'];
+$postdata['value_a'] = (int)$custom[3];
 $postdata['value_b'] = $courseid;
-$postdata['value_c'] = $_POST['userid'];
-$postdata['value_d'] = $_POST['cmid'];
-
+$postdata['value_c'] = $userid;
+$postdata['value_d'] = $cmid;
 $data = new stdClass();
 
-$data->userid = (int)$_POST['userid'];
+$data->userid = (int)$userid;
 $data->courseid = (int)$courseid;
 $data->contextid = (int)$custom[2];
 $data->sectionid = (int)$custom[3];
-$data->instanceid = (int)$_POST['cmid'];
-$data->payment_currency = $_POST['currency_code'];
+$data->instanceid = (int)$cmid;
+$data->payment_currency = $currencycode;
 $data->payment_status = 'Pending';
 $data->txn_id = $postdata['tran_id'];
 $data->timeupdated = time();
 
-$cmid = $_POST['cmid'];
+$cmid = $cmid;
 $sectionid = $data->sectionid;
 
 if (!$cmid && !$sectionid) {
-    print_error('invalidparam');
+    moodle_exception('invalidparam');
 }
 
 if ($cmid) {
@@ -95,7 +107,8 @@ $sslcommerz = availability_sslcommerz_find_condition($conditions);
 
 
 $cost = format_float($sslcommerz->cost, 2, false);
-if ($_POST['amount'] == $cost) {
+$env = get_config('availability_sslcommerz')->prod_environment ?? false;
+if ($amount == $cost) {
     require_login();
     // REQUEST SEND TO SSLCOMMERZ.
     $directapiurl = get_config("availability_sslcommerz")->apiurl;
@@ -106,7 +119,7 @@ if ($_POST['amount'] == $cost) {
     curl_setopt($handle, CURLOPT_POST, 1);
     curl_setopt($handle, CURLOPT_POSTFIELDS, $postdata);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false); // KEEP IT FALSE IF YOU RUN FROM LOCAL PC.
+    curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, $env); // KEEP IT FALSE IF YOU RUN FROM LOCAL PC.
     $content = curl_exec($handle);
     $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
     if ($code == 200 && !(curl_errno($handle))) {
@@ -117,11 +130,11 @@ if ($_POST['amount'] == $cost) {
         echo "FAILED TO CONNECT WITH SSLCOMMERZ API";
         exit;
     }
-// PARSE THE JSON RESPONSE.
+    // PARSE THE JSON RESPONSE.
     $sslcz = json_decode($sslcommerzresponse, true);
     if (isset($sslcz['GatewayPageURL']) && $sslcz['GatewayPageURL'] != "") {
-        // THERE ARE MANY WAYS TO REDIRECT - Javascript, Meta Tag or Php Header Redirect or Other
-        // echo "<script>window.location.href = '". $sslcz['GatewayPageURL'] ."';</script>";
+        // THERE ARE MANY WAYS TO REDIRECT - Javascript, Meta Tag or Php Header Redirect or Other.
+//         echo "<script>window.location.href = '". $sslcz['GatewayPageURL'] ."';</script>";
         echo "<meta http-equiv='refresh' content='0;url=" . $sslcz['GatewayPageURL'] . "'>";
         // ... header("Location: ". $sslcz['GatewayPageURL']);
         exit;

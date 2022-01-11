@@ -33,7 +33,8 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class condition extends \core_availability\condition {
+class condition extends \core_availability\condition
+{
 
     /**
      * Constructor.
@@ -90,8 +91,8 @@ class condition extends \core_availability\condition {
      * by JavaScript code.
      *
      * @param string $businessemail The email of sslcommerz to be credited
-     * @param string $currency      The currency to charge the user
-     * @param string $cost          The cost to charge the user
+     * @param string $currency The currency to charge the user
+     * @param string $cost The cost to charge the user
      * @return stdClass Object representing condition
      */
     public static function get_json($businessemail, $currency, $cost) {
@@ -112,13 +113,13 @@ class condition extends \core_availability\condition {
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
         global $DB;
         $allow = false;
+
         if (is_a($info, '\\core_availability\\info_module')) {
             $context = $info->get_context();
             $allow = $DB->record_exists('availability_sslcommerz_tnx',
                 array('userid' => $userid,
                     'contextid' => $context->id,
                     'payment_status' => 'Completed'));
-
         } else if (is_a($info, '\\core_availability\\info_section')) {
             $section = $info->get_section();
             $allow = $DB->record_exists('availability_sslcommerz_tnx',
@@ -137,20 +138,21 @@ class condition extends \core_availability\condition {
      * version or the full one.
      *
      * @param bool $full Set true if this is the 'full information' view
-     * @param bool $not  True if NOT is in force
+     * @param bool $not True if NOT is in force
      * @param \core_availability\info $info Information about the availability condition and module context
      * @return string    The string about the condition and it's status
      */
     public function get_description($full, $not, \core_availability\info $info) {
         return $this->get_either_description($not, false, $info);
     }
+
     /**
      * Shows the description using the different lang strings for the standalone
      * version or the full one.
      *
-     * @param bool $not        True if NOT is in force
+     * @param bool $not True if NOT is in force
      * @param bool $standalone True to use standalone lang strings
-     * @param bool $info       Information about the availability condition and module context
+     * @param bool $info Information about the availability condition and module context
      * @return string          The string about the condition and it's status
      */
     protected function get_either_description($not, $standalone, $info) {

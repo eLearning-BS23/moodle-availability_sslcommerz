@@ -45,7 +45,7 @@ function xmldb_availability_sslcommerz_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // sslcommerz savepoint reached.
+        // Sslcommerz savepoint reached.
         upgrade_plugin_savepoint(true, 2020022000, 'availability', 'sslcommerz');
     }
 

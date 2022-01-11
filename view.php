@@ -27,6 +27,7 @@
 
 
 require_once('../../../config.php');
+global $CFG, $USER, $SESSION;
 require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
 
 $cmid = optional_param('cmid', 0, PARAM_INT);
@@ -34,7 +35,7 @@ $sectionid = optional_param('sectionid', 0, PARAM_INT);
 $paymentid = optional_param('paymentid', null, PARAM_ALPHANUM);
 
 if (!$cmid && !$sectionid) {
-    print_error('invalidparam');
+    moodle_exception('invalidparam');
 }
 
 if ($cmid) {
@@ -51,7 +52,7 @@ $conditions = json_decode($availability->availability);
 $sslcommerz = availability_sslcommerz_find_condition($conditions);
 
 if (is_null($sslcommerz)) {
-    print_error('no sslcommerz condition for this context.');
+    moodle_exception('no sslcommerz condition for this context.');
 }
 
 $course = $DB->get_record('course', ['id' => $availability->course]);
@@ -62,7 +63,7 @@ $context = \context::instance_by_id($contextid);
 $tnxparams = ['userid' => $USER->id, 'contextid' => $contextid, 'sectionid' => $sectionid];
 
 
-// payment successful
+// Payment successful.
 if ($DB->record_exists('availability_sslcommerz_tnx', $tnxparams + ['payment_status' => 'Completed'])) {
     unset($SESSION->availability_sslcommerz->paymentid);
     redirect($context->get_url(), get_string('paymentcompleted', 'availability_sslcommerz'));
@@ -125,7 +126,7 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         <p><?php print_string("paymentinstant", 'availability_sslcommerz') ?></p>
         <?php
 
-        // Need to edit here
+        // Need to edit here.
 
         $sslcommerzurl = $CFG->wwwroot.'/availability/condition/sslcommerz/checkout.php';
 
@@ -140,13 +141,12 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
             <input type="hidden" name="cmd" value="_xclick" />
             <input type="hidden" name="charset" value="utf-8" />
             <input type="hidden" name="business" value="<?php p($sslcommerz->businessemail)?>" />
-<!--            <input type="hidden" name="item_name" value="--><?php //p($sslcommerz->itemname) ?><!--" />-->
-<!--            <input type="hidden" name="item_number" value="--><?php //p($sslcommerz->itemnumber) ?><!--" />-->
             <input type="hidden" name="quantity" value="1" />
             <input type="hidden" name="userid" value="<?php  echo $USER->id;  ?>" />
             <input type="hidden" name="on0" value="<?php print_string("user") ?>" />
             <input type="hidden" name="os0" value="<?php p($userfullname) ?>" />
-            <input type="hidden" name="custom" value="<?php echo "availability_sslcommerz-{$USER->id}-{$contextid}-{$sectionid}" ?>" />
+            <input type="hidden" name="custom"
+                   value="<?php echo "availability_sslcommerz-{$USER->id}-{$contextid}-{$sectionid}" ?>" />
 
             <input type="hidden" name="currency_code" value="<?php p($sslcommerz->currency) ?>" />
             <input type="hidden" name="amount" value="<?php p($cost) ?>" />
@@ -156,11 +156,13 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
             <input type="hidden" name="cmid" value="<?php echo $cmid; ?>" />
             <input type="hidden" name="no_note" value="1" />
             <input type="hidden" name="no_shipping" value="1" />
-            <input type="hidden" name="notify_url" value="<?php echo "{$CFG->wwwroot}/availability/condition/sslcommerz/ipn.php" ?>" />
+            <input type="hidden" name="notify_url"
+                   value="<?php echo "{$CFG->wwwroot}/availability/condition/sslcommerz/ipn.php" ?>" />
             <input type="hidden" name="return" value="<?php echo $returnurl->out(false); ?>" />
             <input type="hidden" name="cancel_return" value="<?php echo $PAGE->url->out(false); ?>" />
             <input type="hidden" name="rm" value="2" />
-            <input type="hidden" name="cbt" value="<?php print_string("continue", 'availability_sslcommerz') ?>" />
+            <input type="hidden" name="cbt"
+                   value="<?php print_string("continue", 'availability_sslcommerz') ?>" />
 
             <input type="hidden" name="first_name" value="<?php p($userfirstname) ?>" />
             <input type="hidden" name="last_name" value="<?php p($userlastname) ?>" />
@@ -169,7 +171,8 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
             <input type="hidden" name="email" value="<?php p($USER->email) ?>" />
             <input type="hidden" name="country" value="<?php p($USER->country) ?>" />
 
-            <input type="submit" class="btn btn-primary" value="<?php print_string("sendpaymentbutton", "availability_sslcommerz") ?>" />
+            <input type="submit" class="btn btn-primary"
+                   value="<?php print_string("sendpaymentbutton", "availability_sslcommerz") ?>" />
         </form>
         <?php
     }

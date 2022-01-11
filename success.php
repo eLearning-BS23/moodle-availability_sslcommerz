@@ -24,34 +24,48 @@
  */
 
 use mod_lti\local\ltiservice\response;
+
 require(__DIR__ . '/../../../config.php');
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG, $USER, $DB;
+require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
 
 global $CFG, $USER;
-require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
-require_login();
+$tranid = required_param('tran_id', PARAM_TEXT);
 
-global $CFG, $USER;
-$custom =$_POST['value_a'];
-$custom = explode('-', $custom);
-$data = new stdClass();
-$data->userid = $_POST['value_c'];
-$data->contextid = (int)$_POST['value_b'];
-$data->sectionid = $custom[3];
-$data->memo = $_POST['bank_tran_id'];
-$data->tax = 0;
-$data->payment_status = 'Completed';
-$data->txn_id = $_POST['tran_id'];
-$data->payment_type = $_POST['card_type'];
-$data->timeupdated = time();
+if (isset($_POST) && !empty($_POST)) {
+    $valuec = optional_param('value_c', '', PARAM_RAW);
+    $valueb = required_param('value_b', PARAM_INT);
+    $banktranid = required_param('bank_tran_id', PARAM_TEXT);
+    $cardtype = required_param('card_type', PARAM_TEXT);
+    $valued = required_param('value_d', PARAM_INT);
+    $valuea = required_param('value_a', PARAM_INT);
+
+    $data = new stdClass();
+    $data->userid = $valuec;
+    $data->contextid = (int)$valueb;
+    $data->sectionid = $valuea;
+    $data->memo = $banktranid;
+    $data->tax = 0;
+    $data->payment_status = 'Completed';
+    $data->txn_id = $tranid;
+    $data->payment_type = $cardtype;
+    $data->timeupdated = time();
 
 
-$DB->insert_record("availability_sslcommerz_tnx", $data);
+    $DB->insert_record("availability_sslcommerz_tnx", $data);
 
-$url = $CFG->wwwroot. '/?redirect=0';
-if ($_POST['value_d']){
-    $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid='.$_POST['value_d'];
+    $url = $CFG->wwwroot . '/?redirect=0';
+    if ($valued) {
+        $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid=' . $valued;
+
+    }
+    redirect($url, 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
+
+} else {
+    redirect($CFG->wwwroot . '/?redirect=0', 'Something went wrong', null, \core\output\notification::NOTIFY_SUCCESS);
 
 }
-redirect($url, 'successful payment', null, \core\output\notification::NOTIFY_SUCCESS);
 
 

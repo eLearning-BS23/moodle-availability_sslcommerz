@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,8 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'SSLCommerz';
 $string['title'] = 'SSLCommerz Payment';
-
-
+$string['prod_environment'] = 'Production environment';
+$string['prod_environment_desc'] = 'KEEP IT FALSE IF YOU RUN FROM LOCAL PC';
 
 $string['transactionsreport'] = 'SSLCommerz availability payments';
 $string['sscoommerzaccepted'] = 'SSLCommerz payments accepted';

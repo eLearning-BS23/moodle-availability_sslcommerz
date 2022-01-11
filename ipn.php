@@ -33,38 +33,32 @@ global $DB, $CFG, $USER, $PAGE;
 require_once($CFG->libdir . '/enrollib.php');
 require_once($CFG->libdir . '/filelib.php');
 
-
-// PayPal does not like when we return error messages here,
-// the custom handler just logs exceptions and stops.
-set_exception_handler(\availability_sslcommerz\util::get_exception_handler());
-
-//// Make sure we are enabled in the first place.
-//if (!enrol_is_enabled('sslcommerz')) {
-//    http_response_code(503);
-//    throw new moodle_exception('errdisabled', 'enrol_sslcommerz');
-//}
-
 // Read all the data from PayPal and get it ready for later;
 // we expect only valid UTF-8 encoding, it is the responsibility
 // of user to set it up properly in PayPal business account
 // it is documented in docs wiki.
 
+
+$tranid = required_param('tran_id', PARAM_TEXT);
+$valuec = optional_param('value_c','', PARAM_RAW);
+$valueb = required_param('value_b', PARAM_INT);
+$banktranid = required_param('bank_tran_id', PARAM_TEXT);
+$cardtype = required_param('card_type', PARAM_TEXT);
+$valued = required_param('value_d', PARAM_INT);
+$valuea = required_param('value_a', PARAM_INT);
+$$valid = required_param('val_id', PARAM_RAW);
+
 $req = 'cmd=_notify-validate';
 
-
 $data = new stdClass();
-
-$custom = $_POST['value_a'];
-$custom = explode('-', $custom);
-$data = new stdClass();
-$data->userid = $_POST['value_c'];
-$data->contextid = (int)$_POST['value_b'];
-$data->sectionid = $custom[3];
-$data->memo = $_POST['bank_tran_id'];
+$data->userid = $valuec;
+$data->contextid = (int)$valueb;
+$data->sectionid = $valuea;
+$data->memo = $banktranid;
 $data->tax = 0;
 $data->payment_status = 'Completed';
-$data->txn_id = $_POST['tran_id'];
-$data->payment_type = $_POST['card_type'];
+$data->txn_id = $tranid;
+$data->payment_type = $cardtype;
 $data->timeupdated = time();
 
 $user = $DB->get_record("user", array("id" => $data->userid), "*", MUST_EXIST);
@@ -81,15 +75,17 @@ $plugin = availability_get_plugin('sslcommerz');
 // Open a connection back to SSLCommerz to validate the data.
 
 
-$valid = urlencode($_POST['val_id']);
+$valid = urlencode($$valid);
 $storeid = urlencode(get_config('availability_sslcommerz')->sslstoreid);
 $storepasswd = urlencode(get_config('availability_sslcommerz')->sslstorepassword);
 $requestedurl = (get_config("availability_sslcommerz")->requestedurl . "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
 
+$env = get_config('availability_sslcommerz')->prod_environment ?? false;
+
 $handle = curl_init();
 curl_setopt($handle, CURLOPT_URL, $requestedurl);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false); // IF YOU RUN FROM LOCAL PC.
+curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, $env); // IF YOU RUN FROM LOCAL PC.
 
 $result = curl_exec($handle);
 
@@ -109,26 +105,6 @@ if ($result) {
 
     $fullname = format_string($course->fullname, true, array('context' => $context));
 
-    $amount = $_POST['amount'];
-    $currency = $_POST['currency'];
-
-//    if (empty($_POST['amount']) || empty($_POST['currency'])) {
-//
-//        $plugin->unenrol_user($plugininstance, $data->userid);
-//        \enrol_sslcommerz\util::message_sslcommerz_error_to_admin("Invalid Information.",
-//            $data);
-//        die;
-//    }
-
-    // Use the same rounding of floats as on the availability form.
-    $cost = format_float($cost, 2, false);
-
-    if ($result->amount < $cost) {
-        \availability_sslcommerz\util::message_sslcommerz_error_to_admin("Amount paid is not enough ($data->payment_gross < $cost))",
-            $data);
-        redirect($destination, get_string('paymendue', 'availability_sslcommerz', $result->amount));
-        die;
-    }
 
     // Use the queried course's full name for the item_name field.
     $data->item_name = $course->fullname;
@@ -143,8 +119,6 @@ if ($result) {
 
 
         case 'FAILED':
-
-            $data->id = $validation->id;
             $data->payment_status = 'Processing';
             redirect($destination, get_string('paymentfail', 'availability_sslcommerz', $fullname));
 
