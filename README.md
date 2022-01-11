@@ -31,9 +31,6 @@ You can download zip file and install or you can put file under enrol as sslcomm
 
 <img src="https://i.imgur.com/tlj8TH5.png">
 
-
-
-
 ## Usage
 
 <img src="https://i.imgur.com/IEqpHAL.png">
@@ -41,3 +38,12 @@ This works like the [sslcommerz enrol plugin](https://moodle.org/plugins/enrol_s
 
 For each restriction you add, you can set a business email address, cost, currency, item name and item number.
 
+## Author
+- [Brain Station 23 Ltd.](https://brainstation-23.com)
+
+## License
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see [GNU License](http://www.gnu.org/licenses/).
