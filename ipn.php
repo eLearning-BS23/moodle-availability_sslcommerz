@@ -46,7 +46,7 @@ $banktranid = required_param('bank_tran_id', PARAM_TEXT);
 $cardtype = required_param('card_type', PARAM_TEXT);
 $valued = required_param('value_d', PARAM_INT);
 $valuea = required_param('value_a', PARAM_INT);
-$$valid = required_param('val_id', PARAM_RAW);
+$valid = required_param('val_id', PARAM_RAW);
 
 $req = 'cmd=_notify-validate';
 
@@ -75,7 +75,7 @@ $plugin = availability_get_plugin('sslcommerz');
 // Open a connection back to SSLCommerz to validate the data.
 
 
-$valid = urlencode($$valid);
+$valid = urlencode($valid);
 $storeid = urlencode(get_config('availability_sslcommerz')->sslstoreid);
 $storepasswd = urlencode(get_config('availability_sslcommerz')->sslstorepassword);
 $requestedurl = (get_config("availability_sslcommerz")->requestedurl . "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
