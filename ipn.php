@@ -40,7 +40,7 @@ set_exception_handler('availability_sslcommerz_ipn_exception_handler');
 
 
 $tranid = required_param('tran_id', PARAM_TEXT);
-$valuec = optional_param('value_c','', PARAM_INT);
+$valuec = optional_param('value_c', '', PARAM_INT);
 $valueb = required_param('value_b', PARAM_INT);
 $banktranid = required_param('bank_tran_id', PARAM_TEXT);
 $cardtype = required_param('card_type', PARAM_TEXT);
@@ -68,7 +68,8 @@ $data->item_name = $course->fullname ?? 'test';
 $valid = urlencode($valid);
 $storeid = urlencode(get_config('availability_sslcommerz')->sslstoreid);
 $storepasswd = urlencode(get_config('availability_sslcommerz')->sslstorepassword);
-$requestedurl = (get_config("availability_sslcommerz")->requestedurl . "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
+$requestedurl = (get_config("availability_sslcommerz")->requestedurl .
+    "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
 
 $env = get_config('availability_sslcommerz')->prod_environment ?? false;
 
@@ -81,7 +82,7 @@ $curl->setopt(array(
     'CURLOPT_FOLLOWLOCATION' => true,
     'CURLOPT_SSL_VERIFYPEER' => $env
 ));
-$result = $curl->post($requestedurl,$req);
+$result = $curl->post($requestedurl, $req);
 
 
 if (strlen($result) > 0) {
@@ -94,24 +95,20 @@ if (strlen($result) > 0) {
 
     if ($result->status == 'VALIDATED' || $result->status == 'VALID') {
 
-        if($DB->record_exists('availability_sslcommerz_tnx', array('parent_txn_id' => $tranid))) {
+        if ($DB->record_exists('availability_sslcommerz_tnx', array('parent_txn_id' => $tranid))) {
             $DB->update_record('availability_sslcommerz_tnx', $data);
         } else {
             $DB->insert_record("availability_sslcommerz_tnx", $data);
         }
         die;
-    }
-    elseif ($result->status == "FAILED") {
-        availability_sslcommerz_message_error(get_string('paymentfail', 'availability_sslcommerz', $fullname),$data);
-    }
-    elseif ($result->status == "CANCELLED") {
-        availability_sslcommerz_message_error(get_string('paymentcancel','availavility_sslcommerz'),$data);
-    }
-    else{
-        availability_sslcommerz_message_error(get_string('paymentinvalid','availavility_sslcommerz'),$data);
+    } else if ($result->status == "FAILED") {
+        availability_sslcommerz_message_error(get_string('paymentfail', 'availability_sslcommerz', $fullname), $data);
+    } else if ($result->status == "CANCELLED") {
+        availability_sslcommerz_message_error(get_string('paymentcancel', 'availavility_sslcommerz'), $data);
+    } else {
+        availability_sslcommerz_message_error(get_string('paymentinvalid', 'availavility_sslcommerz'), $data);
     }
 }
-
 
 
 /**
@@ -165,9 +162,9 @@ function availability_sslcommerz_message_error($subject, $data) {
 function availability_sslcommerz_ipn_exception_handler($ex) {
     $info = get_exception_info($ex);
 
-    $logerrmsg = "availability_sslcommerz IPN exception handler: ".$info->message;
+    $logerrmsg = "availability_sslcommerz IPN exception handler: " . $info->message;
     if (debugging('', DEBUG_NORMAL)) {
-        $logerrmsg .= ' Debug: '.$info->debuginfo."\n".format_backtrace($info->backtrace, true);
+        $logerrmsg .= ' Debug: ' . $info->debuginfo . "\n" . format_backtrace($info->backtrace, true);
     }
     mtrace($logerrmsg);
     exit(0);

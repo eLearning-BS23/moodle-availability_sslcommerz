@@ -28,6 +28,9 @@ require(__DIR__ . '/../../../config.php');
 
 global $CFG, $USER;
 require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
+
+require_login();
+
 $error = optional_param('error', '', PARAM_TEXT);
 $valued = optional_param('value_d', '', PARAM_TEXT);
 $error = $error ?? 'Payment cancelled by user';

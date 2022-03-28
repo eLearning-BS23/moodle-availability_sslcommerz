@@ -24,7 +24,7 @@
  */
 
 require(__DIR__ . '/../../../config.php');
-require_once($CFG->dirroot.'/lib/filelib.php');
+require_once($CFG->dirroot . '/lib/filelib.php');
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG, $USER, $DB;
@@ -122,7 +122,7 @@ if ($amount == $cost) {
         'CURLOPT_POSTFIELDS' => $postdata,
         'CURLOPT_SSL_VERIFYPEER' => $env
     ));
-    $result = $curl->post($directapiurl,$postdata);
+    $result = $curl->post($directapiurl, $postdata);
 
     $code = json_decode($result)->status;
 
@@ -135,10 +135,7 @@ if ($amount == $cost) {
     // PARSE THE JSON RESPONSE.
     $sslcz = json_decode($sslcommerzresponse, true);
     if (isset($sslcz['GatewayPageURL']) && $sslcz['GatewayPageURL'] != "") {
-        // THERE ARE MANY WAYS TO REDIRECT - Javascript, Meta Tag or Php Header Redirect or Other.
-//         echo "<script>window.location.href = '". $sslcz['GatewayPageURL'] ."';</script>";
         echo "<meta http-equiv='refresh' content='0;url=" . $sslcz['GatewayPageURL'] . "'>";
-        // ... header("Location: ". $sslcz['GatewayPageURL']);
         exit;
     } else {
         echo get_string('error_occured', 'availability_sslcommerz');

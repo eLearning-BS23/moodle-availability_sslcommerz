@@ -24,8 +24,6 @@
 
 namespace availability_sslcommerz;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * SSLCommerz condition.
  *
@@ -33,8 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class condition extends \core_availability\condition
-{
+class condition extends \core_availability\condition {
 
     /**
      * Constructor.

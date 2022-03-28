@@ -28,7 +28,7 @@
 require(__DIR__ . '/../../../config.php');
 global $DB, $CFG, $USER, $PAGE;
 
-require_once($CFG->dirroot.'/availability/condition/sslcommerz/lib.php');
+require_once($CFG->dirroot . '/availability/condition/sslcommerz/lib.php');
 require_once("lib.php");
 
 
@@ -40,10 +40,10 @@ require_once($CFG->libdir . '/filelib.php');
 // of user to set it up properly in PayPal business account
 // it is documented in docs wiki.
 
-
+requiere_login();
 
 $tranid = required_param('tran_id', PARAM_TEXT);
-$valuec = optional_param('value_c','', PARAM_INT);
+$valuec = optional_param('value_c', '', PARAM_INT);
 $valueb = required_param('value_b', PARAM_INT);
 $banktranid = required_param('bank_tran_id', PARAM_TEXT);
 $cardtype = required_param('card_type', PARAM_TEXT);
@@ -83,7 +83,8 @@ $PAGE->set_context($context);
 $valid = urlencode($valid);
 $storeid = urlencode(get_config('availability_sslcommerz')->sslstoreid);
 $storepasswd = urlencode(get_config('availability_sslcommerz')->sslstorepassword);
-$requestedurl = (get_config("availability_sslcommerz")->requestedurl . "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
+$requestedurl = (get_config("availability_sslcommerz")->requestedurl .
+    "?val_id=" . $valid . "&store_id=" . $storeid . "&store_passwd=" . $storepasswd . "&v=1&format=json");
 
 $env = get_config('availability_sslcommerz')->prod_environment ?? false;
 
@@ -96,10 +97,10 @@ $curl->setopt(array(
     'CURLOPT_FOLLOWLOCATION' => true,
     'CURLOPT_SSL_VERIFYPEER' => $env
 ));
-$result = $curl->post($requestedurl,$req);
+$result = $curl->post($requestedurl, $req);
 $result = json_decode($result);
 
-if($result->status == 'VALID'){
+if ($result->status == 'VALID') {
 
     $DB->insert_record("availability_sslcommerz_tnx", $data);
 
@@ -108,9 +109,10 @@ if($result->status == 'VALID'){
         $url = $CFG->wwwroot . '/availability/condition/sslcommerz/view.php?cmid=' . $valued;
 
     }
-    redirect($url, get_string('paymentcompleted','availability_sslcommerz'), null, \core\output\notification::NOTIFY_SUCCESS);
-}
-else{
-    redirect($CFG->wwwroot . '/?redirect=0', get_string('paymentfail','availability_sslcomerz'), null, \core\output\notification::NOTIFY_WARNING);
+    redirect($url, get_string('paymentcompleted', 'availability_sslcommerz'), null, \core\output\notification::NOTIFY_SUCCESS);
+} else {
+    redirect($CFG->wwwroot . '/?redirect=0', get_string('paymentfail',
+        'availability_sslcomerz'), null,
+        \core\output\notification::NOTIFY_WARNING);
 }
 
