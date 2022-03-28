@@ -1,0 +1,9 @@
+/cscope.*
+/.patches/
+.idea/
+/nbproject/
+coverage-report.xml
+composer.phar
+.scannerwork
+phpunit.xml
+sonar-project.properties

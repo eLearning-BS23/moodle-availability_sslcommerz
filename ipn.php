@@ -23,7 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 
 // @codingStandardsIgnoreLine This script does not require login.
 require(__DIR__ . '/../../../config.php');
@@ -32,21 +31,22 @@ global $DB, $CFG, $USER, $PAGE;
 
 require_once($CFG->libdir . '/enrollib.php');
 require_once($CFG->libdir . '/filelib.php');
+set_exception_handler('availability_sslcommerz_ipn_exception_handler');
 
-// Read all the data from PayPal and get it ready for later;
+// Read all the data from sslcommerz and get it ready for later;
 // we expect only valid UTF-8 encoding, it is the responsibility
-// of user to set it up properly in PayPal business account
+// of user to set it up properly in sslcommerz business account
 // it is documented in docs wiki.
 
 
 $tranid = required_param('tran_id', PARAM_TEXT);
-$valuec = optional_param('value_c','', PARAM_RAW);
+$valuec = optional_param('value_c','', PARAM_INT);
 $valueb = required_param('value_b', PARAM_INT);
 $banktranid = required_param('bank_tran_id', PARAM_TEXT);
 $cardtype = required_param('card_type', PARAM_TEXT);
 $valued = required_param('value_d', PARAM_INT);
 $valuea = required_param('value_a', PARAM_INT);
-$valid = required_param('val_id', PARAM_RAW);
+$valid = required_param('val_id', PARAM_INT);
 
 $req = 'cmd=_notify-validate';
 
@@ -60,17 +60,7 @@ $data->payment_status = 'Completed';
 $data->txn_id = $tranid;
 $data->payment_type = $cardtype;
 $data->timeupdated = time();
-
-$user = $DB->get_record("user", array("id" => $data->userid), "*", MUST_EXIST);
-$course = $DB->get_record("course", array("id" => $data->courseid), "*", MUST_EXIST);
-$context = context_course::instance($course->id, MUST_EXIST);
-
-$PAGE->set_context($context);
-//
-//$plugininstance =
-//    $DB->get_record("enrol", array("id" => $data->instanceid, "enrol" => "sslcommerz", "status" => 0), "*", MUST_EXIST);
-$plugin = availability_get_plugin('sslcommerz');
-
+$data->item_name = $course->fullname ?? 'test';
 
 // Open a connection back to SSLCommerz to validate the data.
 
@@ -82,57 +72,103 @@ $requestedurl = (get_config("availability_sslcommerz")->requestedurl . "?val_id=
 
 $env = get_config('availability_sslcommerz')->prod_environment ?? false;
 
-$handle = curl_init();
-curl_setopt($handle, CURLOPT_URL, $requestedurl);
-curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, $env); // IF YOU RUN FROM LOCAL PC.
+$curl = new curl();
+$curl->setopt(array(
+    'CURLOPT_POST' => 1,
+    'CURLOPT_TIMEOUT' => 30,
+    'CURLOPT_CONNECTTIMEOUT' => 30,
+    'CURLOPT_RETURNTRANSFER' => true,
+    'CURLOPT_FOLLOWLOCATION' => true,
+    'CURLOPT_SSL_VERIFYPEER' => $env
+));
+$result = $curl->post($requestedurl,$req);
 
-$result = curl_exec($handle);
 
-$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-
-$result = json_decode($result);
-
-
-if ($result) {
-
-    if (!empty($SESSION->wantsurl)) {
-        $destination = $SESSION->wantsurl;
-        unset($SESSION->wantsurl);
-    } else {
-        $destination = $CFG->wwwroot . "/course/view.php?id=$course->id";
-    }
-
+if (strlen($result) > 0) {
     $fullname = format_string($course->fullname, true, array('context' => $context));
 
-
     // Use the queried course's full name for the item_name field.
-    $data->item_name = $course->fullname;
-    $data->payment_status = $result->status;
 
-    $coursecontext = $PAGE->set_context(context_course::instance());
-    switch ($result->status) {
-        case 'VALID':
+
+    $result = json_decode($result);
+
+    if ($result->status == 'VALIDATED' || $result->status == 'VALID') {
+
+        if($DB->record_exists('availability_sslcommerz_tnx', array('parent_txn_id' => $tranid))) {
+            $DB->update_record('availability_sslcommerz_tnx', $data);
+        } else {
             $DB->insert_record("availability_sslcommerz_tnx", $data);
-
-            break;
-
-
-        case 'FAILED':
-            $data->payment_status = 'Processing';
-            redirect($destination, get_string('paymentfail', 'availability_sslcommerz', $fullname));
-
-            break;
-
-        case 'CANCELLED':
-
-            echo "Payment was Cancelled";
-
-            break;
-
-        default:
-            echo "Invalid Information.";
-
-            break;
+        }
+        die;
     }
+    elseif ($result->status == "FAILED") {
+        availability_sslcommerz_message_error(get_string('paymentfail', 'availability_sslcommerz', $fullname),$data);
+    }
+    elseif ($result->status == "CANCELLED") {
+        availability_sslcommerz_message_error(get_string('paymentcancel','availavility_sslcommerz'),$data);
+    }
+    else{
+        availability_sslcommerz_message_error(get_string('paymentinvalid','availavility_sslcommerz'),$data);
+    }
+}
+
+
+
+/**
+ * Sends message to admin about error
+ *
+ * @param string $subject
+ * @param stdClass $data
+ */
+function availability_sslcommerz_message_error($subject, $data) {
+
+    $userfrom = core_user::get_noreply_user();
+    $recipients = get_users_by_capability(context_system::instance(), 'availability/sslcommerz:receivenotifications');
+
+    if (empty($recipients)) {
+        // Make sure that someone is notified.
+        $recipients = get_admins();
+    }
+
+    $site = get_site();
+
+    $text = "$site->fullname: SSLCommerz transaction problem: {$subject}\n\n";
+    $text .= "Transaction data:\n";
+
+    if ($data) {
+        foreach ($data as $key => $value) {
+            $text .= "* {$key} => {$value}\n";
+        }
+    }
+
+    foreach ($recipients as $recipient) {
+        $message = new \core\message\message();
+        $message->component = 'availability_sslcommerz';
+        $message->name = 'payment_error';
+        $message->userfrom = core_user::get_noreply_user();
+        $message->userto = $recipient;
+        $message->subject = "SSLCommerz ERROR: " . $subject;
+        $message->fullmessage = $text;
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml = text_to_html($text);
+        $message->smallmessage = $subject;
+        message_send($message);
+    }
+}
+
+/**
+ * Silent exception handler.
+ *
+ * @param Exception $ex
+ * @return void - does not return. Terminates execution!
+ */
+function availability_sslcommerz_ipn_exception_handler($ex) {
+    $info = get_exception_info($ex);
+
+    $logerrmsg = "availability_sslcommerz IPN exception handler: ".$info->message;
+    if (debugging('', DEBUG_NORMAL)) {
+        $logerrmsg .= ' Debug: '.$info->debuginfo."\n".format_backtrace($info->backtrace, true);
+    }
+    mtrace($logerrmsg);
+    exit(0);
 }

@@ -24,7 +24,7 @@
  */
 
 require(__DIR__ . '/../../../config.php');
-
+require_once($CFG->dirroot.'/lib/filelib.php');
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG, $USER, $DB;
@@ -85,7 +85,6 @@ $data->payment_status = 'Pending';
 $data->txn_id = $postdata['tran_id'];
 $data->timeupdated = time();
 
-$cmid = $cmid;
 $sectionid = $data->sectionid;
 
 if (!$cmid && !$sectionid) {
@@ -112,22 +111,25 @@ if ($amount == $cost) {
     require_login();
     // REQUEST SEND TO SSLCOMMERZ.
     $directapiurl = get_config("availability_sslcommerz")->apiurl;
-    $handle = curl_init();
-    curl_setopt($handle, CURLOPT_URL, $directapiurl);
-    curl_setopt($handle, CURLOPT_TIMEOUT, 30);
-    curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, 30);
-    curl_setopt($handle, CURLOPT_POST, 1);
-    curl_setopt($handle, CURLOPT_POSTFIELDS, $postdata);
-    curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, $env); // KEEP IT FALSE IF YOU RUN FROM LOCAL PC.
-    $content = curl_exec($handle);
-    $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-    if ($code == 200 && !(curl_errno($handle))) {
-        curl_close($handle);
-        $sslcommerzresponse = $content;
+
+    $curl = new curl();
+    $curl->setopt(array(
+        'CURLOPT_POST' => 1,
+        'CURLOPT_TIMEOUT' => 30,
+        'CURLOPT_CONNECTTIMEOUT' => 30,
+        'CURLOPT_RETURNTRANSFER' => true,
+        'CURLOPT_FOLLOWLOCATION' => true,
+        'CURLOPT_POSTFIELDS' => $postdata,
+        'CURLOPT_SSL_VERIFYPEER' => $env
+    ));
+    $result = $curl->post($directapiurl,$postdata);
+
+    $code = json_decode($result)->status;
+
+    if ($code == 'SUCCESS') {
+        $sslcommerzresponse = $result;
     } else {
-        curl_close($handle);
-        echo "FAILED TO CONNECT WITH SSLCOMMERZ API";
+        echo get_string('error', 'availability_sslcommerz');
         exit;
     }
     // PARSE THE JSON RESPONSE.
@@ -139,10 +141,10 @@ if ($amount == $cost) {
         // ... header("Location: ". $sslcz['GatewayPageURL']);
         exit;
     } else {
-        echo "JSON Data parsing error!";
+        echo get_string('error_occured', 'availability_sslcommerz');
     }
 } else {
-    echo "Amount not match";
+    echo get_string('payment_missmatch', 'availability_sslcommerz');
 }
 
 

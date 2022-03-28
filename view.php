@@ -107,7 +107,7 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         }
         echo '<div class="mdl-align"><p>'.get_string('paymentrequired', 'availability_sslcommerz').'</p>';
         echo '<div class="mdl-align"><p>'.get_string('paymentwaitremider', 'availability_sslcommerz').'</p>';
-        echo '<p><b>'.get_string('cost').": $instance->currency $localisedcost".'</b></p>';
+        echo '<p><strong>'.get_string('cost').": $instance->currency $localisedcost".'</strong></p>';
         echo '<p><a href="'.$wwwroot.'/login/">'.get_string('loginsite').'</a></p>';
         echo '</div>';
     } else {
@@ -119,7 +119,7 @@ if ($paymenttnx && ($paymenttnx->payment_status == 'Pending')) {
         $usercity        = $USER->city;
         ?>
         <p><?php print_string("paymentrequired", 'availability_sslcommerz') ?></p>
-        <p><b><?php echo get_string("cost").": {$sslcommerz->currency} {$localisedcost}"; ?></b></p>
+        <p><strong><?php echo get_string("cost").": {$sslcommerz->currency} {$localisedcost}"; ?></strong></p>
         <p><img alt="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
                 title="<?php print_string('sslcommerzaccepted', 'availability_sslcommerz') ?>"
                 src="https://www.sslcommerz.com/wp-content/uploads/2019/11/footer_logo.png" /></p>

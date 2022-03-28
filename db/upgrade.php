@@ -48,6 +48,5 @@ function xmldb_availability_sslcommerz_upgrade($oldversion) {
         // Sslcommerz savepoint reached.
         upgrade_plugin_savepoint(true, 2020022000, 'availability', 'sslcommerz');
     }
-
     return true;
 }
