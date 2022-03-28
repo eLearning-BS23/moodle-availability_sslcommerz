@@ -24,8 +24,6 @@
 
 namespace sslcommerz\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for core_availability implementing null_provider.
  *
