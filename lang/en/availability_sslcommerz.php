@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Language strings.
+ * Strings for component 'availability_sslcommerz', language 'en', version '3.8'.
  *
- * @package     availability_SSLCommerz
+ * @package     availability_sslcommerz
  * @category    string
- * @copyright   2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();

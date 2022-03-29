@@ -15,11 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Support functions
  *
  * @package availability_sslcommerz
  * @copyright  2021 Brain station 23 ltd <>  {@link https://brainstation-23.com/}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @param $conditions
+ * @return mixed|null
  */
 function availability_sslcommerz_find_condition($conditions) {
     foreach ($conditions->c as $cond) {
@@ -34,11 +35,13 @@ function availability_sslcommerz_find_condition($conditions) {
 }
 
 /**
- * Extend course navigation to add a link to the transactions report.
- *
  * @param navigation_node $parentnode
  * @param stdClass $course
  * @param context_course $context
+ * @return void
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
  */
 function availability_sslcommerz_extend_navigation_course(navigation_node $parentnode, stdClass $course, context_course $context) {
 

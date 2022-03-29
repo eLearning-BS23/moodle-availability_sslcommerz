@@ -40,7 +40,7 @@ require_once($CFG->libdir . '/filelib.php');
 // of user to set it up properly in PayPal business account
 // it is documented in docs wiki.
 
-requiere_login();
+require_login();
 
 $tranid = required_param('tran_id', PARAM_TEXT);
 $valuec = optional_param('value_c', '', PARAM_INT);
